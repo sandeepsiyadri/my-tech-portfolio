@@ -1,0 +1,43 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+// This function is MANDATORY for dynamic routes in Astro
+export async function getStaticPaths() {
+  const tutorialEntries = await getCollection('tutorials');
+  return tutorialEntries.map(entry => ({
+    params: { slug: entry.slug || entry.id }, // Tells Astro what the URL should be
+    props: { entry },                         // Passes the data to the page
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<Layout title={entry.data.title}>
+  <article class="max-w-3xl mx-auto py-12">
+    <a href="/tutorials" class="text-cyan-400 hover:text-cyan-300 text-sm font-medium mb-8 block">
+      ← Back to Tutorials
+    </a>
+    
+    <header class="mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+        {entry.data.title}
+      </h1>
+      <div class="flex items-center gap-4 text-slate-400 text-sm">
+        <time>{entry.data.pubDate.toDateString()}</time>
+        <span>•</span>
+        <div class="flex gap-2">
+          {entry.data.tags.map(tag => (
+            <span class="text-cyan-500 font-mono text-xs">#{tag}</span>
+          ))}
+        </div>
+      </div>
+    </header>
+
+    <div class="prose prose-invert prose-cyan max-w-none">
+      <Content />
+    </div>
+  </article>
+</Layout>
